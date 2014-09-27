@@ -83,7 +83,7 @@ MainView {
                             text: comic.comic_name+i18n.tr(" archives:")
                             model: comic.get_archive_model()
                             delegate: selectorDelegate
-                            containerHeight: units.gu(50)
+                            containerHeight: units.gu(50)-buttons.height;
                             expanded: true
                             property string url: "http://freefall.purrsia.com/";
                         }
@@ -98,6 +98,7 @@ MainView {
                             }
                         }
                         Row{
+                            id: buttons
                             spacing: width * 0.1
                             Button{
                                 text: "Cancel"

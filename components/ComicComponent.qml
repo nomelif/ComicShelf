@@ -24,6 +24,8 @@ Item {
     // Function that updates archive list model
 
     function update(){
+        archive_model.clear();
+        if(comic_name === "Freefall"){
         var update_page_url = "http://freefall.purrsia.com/fcdex.htm"; // The url of the page is set
         var request = new XMLHttpRequest() // Variable to hold the request
         request.open('GET', update_page_url) // Send the request
@@ -38,14 +40,44 @@ Item {
                     archive_model.insert(i-1, {index: i, url:"http://freefall.purrsia.com"+link_list[i].split("\"")[0], name:"Freefall n."+String(parseInt(name.substring(name.indexOf("0/f")+4, name.indexOf("."))))})
                     i = i + 1
                 }
-                /*if(page_url == "http://freefall.purrsia.com/"){
-                    selected_index = 0;
-                }*/
                 archive_model.insert(0, {index: 0, url:"http://freefall.purrsia.com/", name:"Latest Freefall"});
             }
             copy_list_models();
         }
         request.send() // Send the request
+        }else if(comic_name === "Twokinds"){
+            var update_page_url = "http://twokinds.keenspot.com/?p=archive"; // The url of the page is set
+            var request = new XMLHttpRequest() // Variable to hold the request
+            request.open('GET', update_page_url) // Send the request
+            request.onreadystatechange = function(event) { // When the page loading state is changed
+                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
+                    var html_modified = request.responseText; // Load the html to the variable
+                    html_modified = html_modified.substring(html_modified.indexOf("<div class=\"archive\">"), html_modified.indexOf("<div class=\"content-bottom\"></div>")); // Call load comic with the url of th last comic
+                    html_modified = html_modified.substring(0, html_modified.lastIndexOf("/a"))
+                    html_modified = html_modified.split("<h4>");
+                    var i = 1;
+                    var ndth = 1;
+                    var chapter = "x"
+                    while(i < html_modified.length){
+                        chapter = html_modified[i].split("</h4>")[0];
+                        var ii = 1;
+                        var links = html_modified[i].substring(html_modified[i].indexOf("href=\""), html_modified[i].lastIndexOf("\"")).split("href=\"");
+                        while(ii < links.length){
+                            archive_model.append({index: ndth, url:"http://twokinds.keenspot.com/"+links[ii].split("\"")[0], name:"Twokinds n. "+String(ndth)+" ("+chapter+")"});
+                            ii = ii + 1;
+                            ndth = ndth + 1;
+                        }
+                        i = i + 1;
+                    }
+
+                    archive_model.insert(0, {index: 0, url:"http://twokinds.keenspot.com/index.php/", name:"Latest Twokinds"});
+                    archive_model.append({index: ndth, url:"http://twokinds.keenspot.com/archive.php", name: "Twokinds n. "+String(ndth+1)+" ("+chapter+")"})
+                }
+                copy_list_models();
+            }
+            request.send() // Send the request
+            copy_list_models();
+        }
     }
 
     // Function that returns archive list model
@@ -170,6 +202,7 @@ Item {
 
     function get_comic_by_url(url_to_load){
         page_url = url_to_load;
+        if(comic_name === "Freefall"){
         if(page_url === "http://freefall.purrsia.com/"){
             last();
         }
@@ -186,6 +219,18 @@ Item {
                 png_vs_gif = ".png"
             }
             loadComic(page_url.split(".htm")[0] + png_vs_gif)
+        }
+        }else if(comic_name === "Twokinds"){
+            page_url = url_to_load; // The url of the page is set
+            var request = new XMLHttpRequest() // Variable to hold the request
+            request.open('GET', page_url) // Send the request
+            request.onreadystatechange = function(event) { // When the page loading state is changed
+                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
+                    html = request.responseText; // Load the html to the variable
+                    loadComic(extract_image_url()); // Call load comic with the url of th last comic
+                }
+            }
+            request.send() // Send the request
         }
     }
 
