@@ -63,13 +63,31 @@ Item {
         }
     }
 
-    function filter_archives(search_querry){
+    function filter_archives(search_querry, archive_selector){
         var i = 1;
         while(i < archive_model_copy.count){
             if(archive_model_copy.get(i).name.indexOf(search_querry) !== -1){
+                if(archive_selector.url === archive_model_copy.get(i).url){
+                    archive_selector.selectedIndex = i;
+                }
                 i++;
             }else{
-               archive_model_copy.remove(i);
+                if(archive_selector.url === archive_model_copy.get(i).url){
+                    archive_selector.selectedIndex = 0;
+                }
+                archive_model_copy.remove(i);
+            }
+        }
+    }
+
+    function setSelIndexByUrl(selUrl, archive_selector){
+        if(archive_model_copy.count !== archive_model.count){
+            var i = 1;
+            while(i < archive_model_copy.count){
+                if(selUrl === archive_model_copy.get(i).url){
+                    archive_selector.selectedIndex = i;
+                }
+                i = i + 1;
             }
         }
     }
@@ -157,18 +175,18 @@ Item {
         }
 
         comic_strip.source = ""; // Clear the source of the comic strip
-                var fc_vs_fv = "fv"
-                var png_vs_gif = ".gif"
-                if(page_url === "http://freefall.purrsia.com/ff1300/fc01253.htm"){
-                    page_url = "http://freefall.purrsia.com/ff1300/fc01253.htm"
-                    loadComic("http://freefall.purrsia.com/ff1300/fc01253.png");
-                }else{
-                if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1253){
+        var fc_vs_fv = "fv"
+        var png_vs_gif = ".gif"
+        if(page_url === "http://freefall.purrsia.com/ff1300/fc01253.htm"){
+            page_url = "http://freefall.purrsia.com/ff1300/fc01253.htm"
+            loadComic("http://freefall.purrsia.com/ff1300/fc01253.png");
+        }else{
+            if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1253){
                 fc_vs_fv = "fc"
                 png_vs_gif = ".png"
-                }
-                loadComic(page_url.split(".htm")[0] + png_vs_gif)
-                }
+            }
+            loadComic(page_url.split(".htm")[0] + png_vs_gif)
+        }
     }
 
 
@@ -177,16 +195,16 @@ Item {
     function last(){
         comic_strip.source = ""; // Clear the source of the comic strip
         if(comic_name === "Freefall"){ // If the last Freefall must be loaded...
-        page_url = "http://freefall.purrsia.com/"; // The url of the page is set
-        var request = new XMLHttpRequest() // Variable to hold the request
-        request.open('GET', page_url) // Send the request
-        request.onreadystatechange = function(event) { // When the page loading state is changed
-            if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                html = request.responseText; // Load the html to the variable
-                loadComic(extract_image_url()); // Call load comic with the url of th last comic
+            page_url = "http://freefall.purrsia.com/"; // The url of the page is set
+            var request = new XMLHttpRequest() // Variable to hold the request
+            request.open('GET', page_url) // Send the request
+            request.onreadystatechange = function(event) { // When the page loading state is changed
+                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
+                    html = request.responseText; // Load the html to the variable
+                    loadComic(extract_image_url()); // Call load comic with the url of th last comic
+                }
             }
-        }
-        request.send() // Send the request
+            request.send() // Send the request
         }else if(comic_name === "Twokinds"){ // If the last Twokinds must be loaded...
             page_url = "http://twokinds.keenspot.com/"; // The url of the page is set
             var request = new XMLHttpRequest() // Variable to hold the request
@@ -209,7 +227,7 @@ Item {
                 }
             }
             request.send() // Send the request
-            }
+        }
     }
 
     // Function that fetches next comic
@@ -217,40 +235,40 @@ Item {
     function next(){
         if(comic_name === "Freefall" && page_url !== "http://freefall.purrsia.com/" && comic_strip.source != latest_url){ // If the next Freefall must be loaded...
             comic_strip.source = ""; // Clear the source of the comic strip
-                    var fc_vs_fv = "fv"
-                    var png_vs_gif = ".gif"
-                    if(page_url === "http://freefall.purrsia.com/ff1300/fv01252.htm"){
-                        page_url = "http://freefall.purrsia.com/ff1300/fc01253.htm"
-                        loadComic("http://freefall.purrsia.com/ff1300/fc01253.png");
-                    }else{
-                    if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1252){
+            var fc_vs_fv = "fv"
+            var png_vs_gif = ".gif"
+            if(page_url === "http://freefall.purrsia.com/ff1300/fv01252.htm"){
+                page_url = "http://freefall.purrsia.com/ff1300/fc01253.htm"
+                loadComic("http://freefall.purrsia.com/ff1300/fc01253.png");
+            }else{
+                if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1252){
                     fc_vs_fv = "fc"
                     png_vs_gif = ".png"
-                    }
-                    if(page_url.split(".")[2].substring(page_url.split(".")[2].length-2, page_url.split(".")[2].length) !== "00"){
-                        page_url = page_url.split(fc_vs_fv)[0]+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString()+".htm";
-                        loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                    }else{
-                        page_url = page_url.split("ff")[0]+"ff"+(parseInt(page_url.substring(page_url.indexOf("ff")+2, page_url.lastIndexOf("/f")))+100).toString()+"/"+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString()+".htm";
-                        loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                    }
-                    }
+                }
+                if(page_url.split(".")[2].substring(page_url.split(".")[2].length-2, page_url.split(".")[2].length) !== "00"){
+                    page_url = page_url.split(fc_vs_fv)[0]+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString()+".htm";
+                    loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
+                }else{
+                    page_url = page_url.split("ff")[0]+"ff"+(parseInt(page_url.substring(page_url.indexOf("ff")+2, page_url.lastIndexOf("/f")))+100).toString()+"/"+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString()+".htm";
+                    loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
+                }
+            }
         }else if(comic_name === "Twokinds"){ // If the next Twokinds must be loaded...
             if(page_url !== "http://twokinds.keenspot.com/archive.php" && page_url !== "http://twokinds.keenspot.com/index.php"){
-                    if(html.indexOf("id=\"cg_next\"><span>Next Comic &raquo;</span></a>") !== -1){
-                            var request = new XMLHttpRequest() // Variable to hold the request
-                            page_url = "http://twokinds.keenspot.com/archive.php?p="+(parseInt(page_url.split("=")[1])+1).toString()
-                            request.open('GET', page_url)
-                            request.onreadystatechange = function(event) { // When the page loading state is changed
-                                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                                    html = request.responseText; // Load the html to the variable
-                                    loadComic(extract_image_url());
-                                }
-                            }
-                            request.send() // Send the request
-                        }else{
-                            last();
+                if(html.indexOf("id=\"cg_next\"><span>Next Comic &raquo;</span></a>") !== -1){
+                    var request = new XMLHttpRequest() // Variable to hold the request
+                    page_url = "http://twokinds.keenspot.com/archive.php?p="+(parseInt(page_url.split("=")[1])+1).toString()
+                    request.open('GET', page_url)
+                    request.onreadystatechange = function(event) { // When the page loading state is changed
+                        if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
+                            html = request.responseText; // Load the html to the variable
+                            loadComic(extract_image_url());
                         }
+                    }
+                    request.send() // Send the request
+                }else{
+                    last();
+                }
 
 
             }else if(page_url === "http://twokinds.keenspot.com/archive.php"){
@@ -267,7 +285,7 @@ Item {
                 }
             }
             request.send() // Send the request
-            }
+        }
     }
 
     // Function that determines the previous strip and calls load_comic
@@ -275,8 +293,8 @@ Item {
     function previous(){
         if(comic_name === "Freefall"){ // If the next Freefall must be loaded...
             if(page_url !== "http://freefall.purrsia.com/"){
-            if(page_url !== "http://freefall.purrsia.com/ff100/fv00001.htm"){
-            comic_strip.source = ""; // Clear the source of the comic strip
+                if(page_url !== "http://freefall.purrsia.com/ff100/fv00001.htm"){
+                    comic_strip.source = ""; // Clear the source of the comic strip
                     var fc_vs_fv = "fv"
                     var png_vs_gif = ".gif"
 
@@ -285,53 +303,53 @@ Item {
                         loadComic("http://freefall.purrsia.com/ff1300/fv01252.gif");
                     }else{
 
-                    if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1253){
-                    fc_vs_fv = "fc"
-                    png_vs_gif = ".png"
+                        if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1253){
+                            fc_vs_fv = "fc"
+                            png_vs_gif = ".png"
+                        }
+                        if(page_url.split(".")[2].substring(page_url.split(".")[2].length-2, page_url.split(".")[2].length) !== "00"){
+                            page_url = page_url.split(fc_vs_fv)[0]+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])-1).toString()+".htm";
+                            loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
+                        }else{
+                            page_url = page_url.split("ff")[0]+"ff"+(parseInt(page_url.substring(page_url.indexOf("ff")+2, page_url.lastIndexOf("/f")))-100).toString()+"/"+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])-1).toString()+".htm";
+                            loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
+                        }
                     }
-                    if(page_url.split(".")[2].substring(page_url.split(".")[2].length-2, page_url.split(".")[2].length) !== "00"){
-                        page_url = page_url.split(fc_vs_fv)[0]+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])-1).toString()+".htm";
-                    loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                    }else{
-                        page_url = page_url.split("ff")[0]+"ff"+(parseInt(page_url.substring(page_url.indexOf("ff")+2, page_url.lastIndexOf("/f")))-100).toString()+"/"+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])-1).toString()+".htm";
-                        loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                    }
-                    }
-            }
-        }else{
+                }
+            }else{
                 var html_modified = html.substring(0, html.indexOf("\">Previous</A>"));
                 page_url = "http://freefall.purrsia.com"+html_modified.substring(html_modified.lastIndexOf("<A HREF=\"")+9, html_modified.length);
                 loadComic(page_url.split(".htm")[0]+".png");
             }
         }else if(comic_name === "Twokinds"){ // If the next Twokinds must be loaded...
             if(page_url !== "http://twokinds.keenspot.com/"){
-                    if(page_url !== "http://twokinds.keenspot.com/archive.php?p=1" && page_url !== "http://twokinds.keenspot.com/archive.php"){
-                            var request = new XMLHttpRequest() // Variable to hold the request
-                            page_url = "http://twokinds.keenspot.com/archive.php?p="+(parseInt(page_url.split("=")[1])-1).toString()
-                            request.open('GET', page_url)
-                            request.onreadystatechange = function(event) { // When the page loading state is changed
-                                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                                    html = request.responseText; // Load the html to the variable
-                                    loadComic(extract_image_url());
-                                }
-                            }
-                            request.send() // Send the request
-                        }else{
-                            if(page_url == "http://twokinds.keenspot.com/archive.php?p=1"){
-                                first();
-                            }else{
-                                var request = new XMLHttpRequest() // Variable to hold the request
-                                page_url = html.substring(html.indexOf("<span class=\"cg_divider\"> &middot; </span><a href=\"")+51, html.indexOf("\" id=\"cg_back\">"))
-                                request.open('GET', page_url)
-                                request.onreadystatechange = function(event) { // When the page loading state is changed
-                                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                                        html = request.responseText; // Load the html to the variable
-                                        loadComic(extract_image_url());
-                                    }
-                                }
-                                request.send() // Send the request
+                if(page_url !== "http://twokinds.keenspot.com/archive.php?p=1" && page_url !== "http://twokinds.keenspot.com/archive.php"){
+                    var request = new XMLHttpRequest() // Variable to hold the request
+                    page_url = "http://twokinds.keenspot.com/archive.php?p="+(parseInt(page_url.split("=")[1])-1).toString()
+                    request.open('GET', page_url)
+                    request.onreadystatechange = function(event) { // When the page loading state is changed
+                        if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
+                            html = request.responseText; // Load the html to the variable
+                            loadComic(extract_image_url());
+                        }
+                    }
+                    request.send() // Send the request
+                }else{
+                    if(page_url == "http://twokinds.keenspot.com/archive.php?p=1"){
+                        first();
+                    }else{
+                        var request = new XMLHttpRequest() // Variable to hold the request
+                        page_url = html.substring(html.indexOf("<span class=\"cg_divider\"> &middot; </span><a href=\"")+51, html.indexOf("\" id=\"cg_back\">"))
+                        request.open('GET', page_url)
+                        request.onreadystatechange = function(event) { // When the page loading state is changed
+                            if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
+                                html = request.responseText; // Load the html to the variable
+                                loadComic(extract_image_url());
                             }
                         }
+                        request.send() // Send the request
+                    }
+                }
 
 
             }else{
@@ -357,7 +375,7 @@ Item {
                 }
             }
             request.send() // Send the request
-            }
+        }
     }
 
     // Function that determines the first strip and calls load_comic
@@ -383,7 +401,7 @@ Item {
             }
         }
         request.send() // Send the request
-}
+    }
 
     id: shape
     width: parent.width - units.gu(3);
@@ -412,19 +430,19 @@ Item {
         contentHeight: comic_strip.height
         anchors.horizontalCenter: parent.horizontalCenter
         clip: true;
-    Image{ // Image to hold the comic strip
-        id: comic_strip
-        visible: false;
-        onProgressChanged: checkLoading() // Calls check_comic whenever the progress changes
-    }
+        Image{ // Image to hold the comic strip
+            id: comic_strip
+            visible: false;
+            onProgressChanged: checkLoading() // Calls check_comic whenever the progress changes
+        }
     }
 
     ProgressBar { // Busy-indicator
-            id: activity
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            value: 0;
-        }
+        id: activity
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        value: 0;
+    }
     Text{ // Text telling that the comic is loading
         id: comic_status
         text: comic_name+i18n.tr(" is loading...")
