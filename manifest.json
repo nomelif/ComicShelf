@@ -1,0 +1,15 @@
+{
+    "architecture": "all",
+    "description": "An app for reading webcomics",
+    "framework": "ubuntu-sdk-14.04",
+    "hooks": {
+        "myapp": {
+            "apparmor": "myapp.apparmor",
+            "desktop": "myapp.desktop"
+        }
+    },
+    "maintainer": "Théo Friberg <theo.friberg@gmail.com>",
+    "name": "com.ubuntu.developer.username.comicshelf",
+    "title": "ComicShelf",
+    "version": "0.1"
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=ComicShelf
+Exec=qmlscene $@ main.qml
+Icon=graphics/LauncherIcon.svg
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true
+
