@@ -16,6 +16,10 @@ Item {
         id: archive_model
 
     }
+    ListModel{
+        id: archive_model_copy
+
+    }
 
     // Function that updates archive list model
 
@@ -39,6 +43,7 @@ Item {
                 }*/
                 archive_model.insert(0, {index: 0, url:"http://freefall.purrsia.com/", name:"Latest Freefall"});
             }
+            copy_list_models();
         }
         request.send() // Send the request
     }
@@ -46,7 +51,27 @@ Item {
     // Function that returns archive list model
 
     function get_archive_model(){
-        return archive_model
+        return archive_model_copy
+    }
+
+    function copy_list_models(){
+        archive_model_copy.clear();
+        var i = 0;
+        while(i < archive_model.count){
+            archive_model_copy.append(archive_model.get(i));
+            i = i + 1;
+        }
+    }
+
+    function filter_archives(search_querry){
+        var i = 1;
+        while(i < archive_model_copy.count){
+            if(archive_model_copy.get(i).name.indexOf(search_querry) !== -1){
+                i++;
+            }else{
+               archive_model_copy.remove(i);
+            }
+        }
     }
 
     // Function that sets comic name and loads latest strip

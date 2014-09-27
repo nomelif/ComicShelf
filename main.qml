@@ -64,7 +64,20 @@ MainView {
 
                             Dialog {
                                 id: popover
-
+                                TextField {
+                                    id: search_querry
+                                    width: parent.width
+                                    placeholderText: "Enter search querry"
+                                    onTextChanged: {
+                                        if(text.length > length){
+                                            comic.filter_archives(text);
+                                        }else{
+                                            comic.copy_list_models();
+                                        }
+                                        length = text.length;
+                                    }
+                                    property int length: 0;
+                                }
                                 OptionSelector {
                                     id: archive_selector
                                     text: comic.comic_name+i18n.tr(" archives:")
@@ -72,13 +85,14 @@ MainView {
                                     delegate: selectorDelegate
                                     containerHeight: units.gu(50)
                                     expanded: true
-                                    property string url: comic.page_url;
+                                    property string url: "http://freefall.purrsia.com/";
                                 }
                                 Component {
                                     id: selectorDelegate
                                     OptionSelectorDelegate {
                                         text: name;
-                                        onClicked: {archive_selector.url = url;}
+                                        onClicked: {archive_selector.url = url;
+                                        }
                                     }
                                 }
                                 Row{
