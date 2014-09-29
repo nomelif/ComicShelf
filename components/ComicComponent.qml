@@ -72,43 +72,37 @@ Item {
 
                     archive_model.insert(0, {index: 0, url:"http://twokinds.keenspot.com/index.php/", name:"Latest Twokinds"});
                     archive_model.append({index: ndth, url:"http://twokinds.keenspot.com/archive.php", name: "Twokinds n. "+String(ndth+1)+" ("+chapter+")"})
+                    copy_list_models();
                 }
-                copy_list_models();
             }
             request.send() // Send the request
-            copy_list_models();
         }else if(comic_name === "Caribbean Blue"){
-            var update_page_url = "http://twokinds.keenspot.com/?p=archive"; // The url of the page is set
+            var update_page_url = "http://cblue.katbox.net/archive/"; // The url of the page is set
             var request = new XMLHttpRequest() // Variable to hold the request
             request.open('GET', update_page_url) // Send the request
             request.onreadystatechange = function(event) { // When the page loading state is changed
                 if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
                     var html_modified = request.responseText; // Load the html to the variable
-                    html_modified = html_modified.substring(html_modified.indexOf("<div class=\"archive\">"), html_modified.indexOf("<div class=\"content-bottom\"></div>")); // Call load comic with the url of th last comic
-                    html_modified = html_modified.substring(0, html_modified.lastIndexOf("/a"))
-                    html_modified = html_modified.split("<h4>");
-                    var i = 1;
-                    var ndth = 1;
-                    var chapter = "x"
+                    var qty = html_modified.split("class=\"archive-link\"").length;
+                    html_modified = html_modified.split("<!-- .archive-header -->")[1].split("<script type=\"text/javascript\">")[0].split("<header class='archive-year'>")
+                    var i = 0;
+                    var ndth = 0;
                     while(i < html_modified.length){
-                        chapter = html_modified[i].split("</h4>")[0];
                         var ii = 1;
-                        var links = html_modified[i].substring(html_modified[i].indexOf("href=\""), html_modified[i].lastIndexOf("\"")).split("href=\"");
+                        var links = html_modified[i].split("<a href=\"")
                         while(ii < links.length){
-                            archive_model.append({index: ndth, url:"http://twokinds.keenspot.com/"+links[ii].split("\"")[0], name:"Twokinds n. "+String(ndth)+" ("+chapter+")"});
+                            archive_model.insert(0, {index: qty-ndth-1, url:links[ii].split("\"")[0], name:links[ii].split(">")[1].split("<")[0].replace("&#8211;", " - ").replace("&#8217;", "'").replace("&#8220;", "“").replace("&#8221;", "”").replace("&#8230;", "…").replace("&#8217;", "’")});
                             ii = ii + 1;
                             ndth = ndth + 1;
                         }
+
                         i = i + 1;
                     }
-
-                    archive_model.insert(0, {index: 0, url:"http://twokinds.keenspot.com/index.php/", name:"Latest Twokinds"});
-                    archive_model.append({index: ndth, url:"http://twokinds.keenspot.com/archive.php", name: "Twokinds n. "+String(ndth+1)+" ("+chapter+")"})
+                    archive_model.insert(0, {index: 0, url:"[last]", name:"Latest Caribbean Blue"});
+                    copy_list_models();
                 }
-                copy_list_models();
             }
             request.send() // Send the request
-            copy_list_models();
         }
     }
 
@@ -233,6 +227,9 @@ Item {
     }
 
     function get_comic_by_url(url_to_load){
+        if(url_to_load === "[last]"){
+            last();
+        }else{
         page_url = url_to_load;
         if(comic_name === "Freefall"){
         if(page_url === "http://freefall.purrsia.com/"){
@@ -263,7 +260,19 @@ Item {
                 }
             }
             request.send() // Send the request
+        }else if(comic_name === "Caribbean Blue"){
+            page_url = url_to_load; // The url of the page is set
+            var request = new XMLHttpRequest() // Variable to hold the request
+            request.open('GET', page_url) // Send the request
+            request.onreadystatechange = function(event) { // When the page loading state is changed
+                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
+                    html = request.responseText; // Load the html to the variable
+                    loadComic(extract_image_url()); // Call load comic with the url of th last comic
+                }
+            }
+            request.send() // Send the request
         }
+    }
     }
 
 

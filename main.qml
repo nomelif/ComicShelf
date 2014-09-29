@@ -85,7 +85,7 @@ MainView {
                             delegate: selectorDelegate
                             containerHeight: units.gu(50)-buttons.height;
                             expanded: true
-                            property string url: "http://freefall.purrsia.com/";
+                            property string url: "[last]";
                         }
                         Component {
                             id: selectorDelegate
