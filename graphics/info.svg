@@ -14,9 +14,9 @@
    width="90"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="back.svg">
+   sodipodi:docname="help.svg">
   <defs
-     id="defs12" />
+     id="defs11" />
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -27,16 +27,16 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1360"
-     inkscape:window-height="738"
-     id="namedview10"
+     inkscape:window-height="702"
+     id="namedview9"
      showgrid="false"
-     inkscape:zoom="2.6222222"
-     inkscape:cx="45"
-     inkscape:cy="45.381356"
-     inkscape:window-x="-4"
-     inkscape:window-y="-6"
+     inkscape:zoom="0.92709556"
+     inkscape:cx="103.97165"
+     inkscape:cy="55.340816"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g4978" />
+     inkscape:current-layer="layer1" />
   <metadata
      id="metadata3145">
     <rdf:RDF>
@@ -60,25 +60,25 @@
        y="962.36"
        x="0" />
     <g
-       id="g4978"
-       transform="translate(-60 548)">
-      <path
-         id="path4984"
-         style="color:#000000;fill:#ffffff"
-         transform="matrix(3.5011 0 0 3.5548 -307.21 -174.5)"
-         d="m113.92 179.14c-0.52479 0.30299-8.7464-4.4438-8.7464-5.0498 0-0.60597 8.2216-5.3527 8.7464-5.0498 0.52478 0.30299 0.52478 9.7965 0 10.1z" />
-      <path
-         id="path4988"
-         style="block-progression:tb;text-indent:0;color:#000000;text-transform:none;fill:#ffffff"
-         d="m87 438.36v12l39 0.002c12-0.0002 12-0.0002 12 8.9998v9c0 9 0 9-12 9.0002l-15-0.002v12l9 0.002c27 0 30 0 30-18v-15.002c0-17.998-3-17.998-30-17.998z" />
-      <rect
-         id="rect3038"
-         style="color:#000000;fill:none"
-         transform="translate(60 414.36)"
-         height="90"
-         width="90"
-         y=".000017383"
-         x="0" />
+       id="text3006"
+       style="fill:#808080"
+       transform="matrix(0.92816039,0,0,0.92816039,4.1068095,75.523704)">
+      <text
+         xml:space="preserve"
+         style="font-size:13.40049744px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#808080;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+         x="32.962711"
+         y="1031.6575"
+         id="text2988"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan2990"
+           x="32.962711"
+           y="1031.6575"
+           style="font-size:80.40298462px;fill:#808080;fill-opacity:1">!</tspan></text>
     </g>
+    <path
+       id="path3759"
+       style="fill:#808080"
+       d="m6 986.36v42c0 18 3 18 30 18h18c27 0 30 0 30-18v-42c0-18-3-18-30-18h-18c-27 0-30 0-30 18zm30-12h18c24 0 24 0 24 12v42c0 12 0 12-24 12h-18c-24 0-24 0-24-12v-42c0-12 0-12 24-12z" />
   </g>
 </svg>

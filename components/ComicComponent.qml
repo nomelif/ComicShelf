@@ -5,154 +5,103 @@ import QtQuick.Window 2.0
 // Item holding all the components of the comic reader
 
 Item {
-    property string comic_name: ""; // Name of the current comic (eg. "Twokinds")
-    property string page_url: ""; // url of the html-page where the comic being displayed can be seen
-    property string html: ""; // Name of the current comic (eg. "Twokinds")
-    property string url: ""; // Url of the latest loaded web page
-    property string latest_url: "";
-    property Tabs tabs;
 
-    // List model of all comics
+    // Comic Adapters -------------------------------------------------------------------------
 
-    ListModel{
-        id: archive_model
 
-    }
-    ListModel{
-        id: archive_model_copy
 
+
+    TwokindsComicAdapter{
+        id: tk_adapter;
+        load: loadComic;
+        archive: archive_model;
     }
 
+    XKCDComicAdapter{
+        id: xkcd_adapter;
+        load: loadComic;
+        archive: archive_model;
+    }
+
+    FreefallComicAdapter{
+        id: freefall_adapter;
+        load: loadComic;
+        archive: archive_model;
+    }
+
+    CaribbeanBlueComicAdapter{
+        id: cblue_adapter;
+        load: loadComic;
+        archive: archive_model;
+    }
+
+    // Properties ------------------------------------------------------------------------------
 
 
-    // Function that updates archive list model
+
+
+    // Property for using adapter-classes in a polymorphical fashion (the variable adapter will be set to point to the correct adapter-instance)
+
+    property var adapter;
+
+    // Name of the current comic in a human-readable format
+
+    property string comic_name;
+
+    width: parent.width - units.gu(3);
+    anchors.horizontalCenter: parent.horizontalCenter;
+    anchors.verticalCenter: parent.verticalCenter;
+    height: (parent.height / 3)*2;
+
+    // ListModels ------------------------------------------------------------------------------
+
+
+
+    // This ListModel contains the full archives of the current commic.
+
+    ListModel{
+        id: archive_model;
+
+    }
+
+    // This ListModel contains the model displayed in the dialog to select comics. This can and will be modified and filtered
+
+    ListModel{
+        id: archive_model_copy;
+
+    }
+
+
+    // Methods ---------------------------------------------------------------------------------
+
+
+
+    // Function, that returns the title of the strip_title:
+
+    function get_title(){
+        return ""
+    }
+
+
+    // Function that updates archive_model ListModel
 
     function update(){
 
-        archive_model.clear(); // Clear archive model
-
-        if(comic_name === "Freefall"){ // If we are constructing the index of Freefall
-            var update_page_url = "http://freefall.purrsia.com/fcdex.htm"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', update_page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    var html_modified = request.responseText; // Load the html to the variable
-                    // Begin treating html
-                    html_modified = html_modified.substring(html_modified.indexOf("<FONT SIZE=+1>The adventure begins!</FONT>&nbsp;&nbsp;3/30/1998<BR>"), html_modified.indexOf("<A HREF=\"/default.htm\">Current</A>")); // Call load comic with the url of th last comic
-                    // List of all links
-                    var link_list = html_modified.split("HREF=\"")
-                    var i = 1;
-                    // Iterate throught the list of links
-                    while(i < link_list.length){
-                        // Get the name of the strip
-                        var name = link_list[i].split("\"")[0]
-                        // Insert relevant information to the archive model
-                        archive_model.insert(i-1, {index: i, url:"http://freefall.purrsia.com"+link_list[i].split("\"")[0], name:"Freefall n."+String(parseInt(name.substring(name.indexOf("0/f")+4, name.indexOf("."))))})
-                        i = i + 1
-                    }
-                    // Insert latest strip to the archive model
-                    archive_model.insert(0, {index: 0, url:"http://freefall.purrsia.com/", name:"Latest Freefall"});
-                }
-                // Copy the archive model to the list model to searchimport QtQuick.Window 2.2
-                copy_list_models();
-            }
-            request.send() // Send the request
-        }else if(comic_name === "Twokinds"){ // If we are constructing the index of Twokinds
-            var update_page_url = "http://twokinds.keenspot.com/?p=archive"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', update_page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    var html_modified = request.responseText; // Load the html to the variable
-                    // Split the html by chapter
-                    html_modified = html_modified.substring(html_modified.indexOf("<div class=\"archive\">"), html_modified.indexOf("<div class=\"content-bottom\"></div>")); // Call load comic with the url of th last comic
-                    html_modified = html_modified.substring(0, html_modified.lastIndexOf("/a"))
-                    html_modified = html_modified.split("<h4>");
-                    var i = 1;
-                    var ndth = 1; // Iterator for giving values to the index property of the list model
-                    var chapter = "x" // Chapter in wich the current strip appears
-                    while(i < html_modified.length){ // Iterate through chapters
-                        chapter = html_modified[i].split("</h4>")[0]; // Retrieve the name of the chapter
-                        var ii = 1;
-                        // Retrieve list of links from chapter's html
-                        var links = html_modified[i].substring(html_modified[i].indexOf("href=\""), html_modified[i].lastIndexOf("\"")).split("href=\"");
-                        // Iterate through the list of links
-                        while(ii < links.length){
-                            archive_model.append({index: ndth, url:"http://twokinds.keenspot.com/"+links[ii].split("\"")[0], name:"Twokinds n. "+String(ndth)+" ("+chapter+")"});
-                            ii = ii + 1;
-                            ndth = ndth + 1;
-                        }
-                        i = i + 1;
-                    }
-                    // Insert the missing two entries
-                    archive_model.insert(0, {index: 0, url:"http://twokinds.keenspot.com/index.php/", name:"Latest Twokinds"});
-                    archive_model.append({index: ndth, url:"http://twokinds.keenspot.com/archive.php", name: "Twokinds n. "+String(ndth+1)+" ("+chapter+")"})
-                    // Copy the archive model to the list model to search
-                    copy_list_models();
-                }
-            }
-            request.send() // Send the request
-        }else if(comic_name === "Caribbean Blue"){ // If we are constructing the index of Caribbean Blue
-            var update_page_url = "http://cblue.katbox.net/archive/"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', update_page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    var html_modified = request.responseText; // Load the html to the variable
-                    var qty = html_modified.split("class=\"archive-link\"").length;
-                    html_modified = html_modified.split("<!-- .archive-header -->")[1].split("<script type=\"text/javascript\">")[0].split("<header class='archive-year'>")
-                    var i = 0;
-                    var ndth = 0;
-                    while(i < html_modified.length){
-                        var ii = 1;
-                        var links = html_modified[i].split("<a href=\"")
-                        while(ii < links.length){
-                            archive_model.insert(0, {index: qty-ndth-1, url:links[ii].split("\"")[0], name:links[ii].split(">")[1].split("<")[0].replace("&#8211;", " - ").replace("&#8217;", "'").replace("&#8220;", "“").replace("&#8221;", "”").replace("&#8230;", "…").replace("&#8217;", "’")});
-                            ii = ii + 1;
-                            ndth = ndth + 1;
-                        }
-
-                        i = i + 1;
-                    }
-                    archive_model.insert(0, {index: 0, url:"[last]", name:"Latest Caribbean Blue"});
-                    copy_list_models();
-                }
-            }
-            request.send() // Send the request
-        }else if(comic_name === "XKCD"){ // If we are constructing the index of Caribbean Blue
-            var update_page_url = "http://xkcd.com/archive/"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', update_page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    var html_modified = request.responseText; // Load the html to the variable
-                    html_modified = html_modified.split("<h1>Comics:</h1><br/>\n(Hover mouse over title to view publication date)<br /><br />")[1].split("</div>")[0]
-                    html_modified = html_modified.split("<a")
-                    var i = 0;
-                    while(i < html_modified.length){
-                        var link = html_modified[i].split("<")[0]
-                        var ndth = link.split("/")[1]
-                        var date = link.split("\"")[3]
-                        var title = link.split(">")[1]
-                        archive_model.insert(0, {index: parseInt(ndth), url:"http://xkcd.com"+link.split("\"")[1]+"info.0.json", name:title + " ("+date+") n."+ndth});
-                        i = i + 1
-                    }
-                    archive_model.insert(0, {index: 0, url:"[last]", name:"Latest xkcd"});
-                    copy_list_models();
-                }
-            }
-            request.send() // Send the request
-        }
+        archive_model.clear(); // Clear archive_model ListModel's contents
+        adapter.update(); // Call the update-method of the correct comic-adapter
     }
 
     // Function that returns archive list model
 
     function get_archive_model(){
-        return archive_model_copy
+
+        return archive_model_copy;
     }
 
+    // Function that copies the contents of the original archive_model to archive_model_copy
+
     function copy_list_models(){
+
         archive_model_copy.clear();
         var i = 0;
         while(i < archive_model.count){
@@ -161,7 +110,10 @@ Item {
         }
     }
 
+    // Function that filters searches by removing unwanted elements from archive_model_copy
+
     function filter_archives(search_querry, archive_selector){
+
         var i = 1;
         while(i < archive_model_copy.count){
             if(archive_model_copy.get(i).name.indexOf(search_querry) !== -1){
@@ -178,7 +130,10 @@ Item {
         }
     }
 
+    // Callback called from dialog to get index of clicked element (Dark Magic)
+
     function setSelIndexByUrl(selUrl, archive_selector){
+
         if(archive_model_copy.count !== archive_model.count){
             var i = 1;
             while(i < archive_model_copy.count){
@@ -193,7 +148,18 @@ Item {
     // Function that sets comic name and loads latest strip
 
     function set_comic(name){
-        no_selection_msg.visible = false;
+
+        if(name === "Freefall"){
+            adapter = freefall_adapter;
+        }else if(name === "Twokinds"){
+            adapter =  tk_adapter;
+        }else if(name === "Caribbean Blue"){
+            adapter =  cblue_adapter;
+        }else if(name === "XKCD"){
+            adapter =  xkcd_adapter;
+        }
+
+        error_msg.visible = false;
         comic_name = name;
         last();
     }
@@ -201,6 +167,7 @@ Item {
     // Function that shows the image and hides the busy-indicator and text
 
     function show_image(){
+
         comic_strip.visible = true;
         activity.visible = false;
         comic_status.visible = false;
@@ -210,6 +177,7 @@ Item {
     // Function that hides the image and shows the busy-indicator and text
 
     function show_loading_status(name){
+
         comic_strip.visible = false;
         activity.visible = true;
         comic_status.visible = true;
@@ -218,7 +186,8 @@ Item {
     // Function that loads the comic into the image and shows the loading-widgets
 
     function loadComic(url){
-        update()
+
+        update();
         comic_strip.source = url;
         if(comic_strip.progress !== 1){
             show_loading_status();
@@ -229,108 +198,19 @@ Item {
     // Function that, if the image is loaded calls show_image() to show the image
 
     function checkLoading(){
+
         if(comic_strip.progress === 1){
             show_image();
         }
         activity.value = comic_strip.progress;
     }
 
-    // Function determining the url of an image assoiciated to a html-page
-    function extract_image_url(){
-        if(comic_name == "Freefall"){
-            if(page_url === "http://freefall.purrsia.com/"){
-                var html_modified = html.substring(html.search("The grayscale version"), html.search("Freefall updates on Monday, Wednesday, and Friday."));
-                var url = "http://freefall.purrsia.com"+html_modified.substring(html_modified.indexOf("<img src=\"")+10, html_modified.indexOf("\" height="));
-                url = url;
-                return url
-            }else if(page_url.indexOf("http://freefall.purrsia.com/ff") !== -1){
-                var html_modified = html.substring(html.indexOf("<img src=\"")+10, html.indexOf("\" height="));
-                var url = "http://freefall.purrsia.com"+html_modified;
-                return url;
-            }
-        }else if(comic_name == "Twokinds"){
-            if(page_url === "http://twokinds.keenspot.com/index.php" || page_url === "http://twokinds.keenspot.com/"){
-                var html_modified = html.substring(html.search("Comic Page for"), html.length)
-                var url = "http://twokinds.keenspot.com/"+html_modified.substring(html_modified.search("<img src=\"")+10, html_modified.search("\" title=\""))
-                url = url;
-                return url;
-            }else{
-                var html_modified = html.substring(html.indexOf("<p id=\"cg_img\">"), html.length)
-                return html_modified.substring(html_modified.search("src=\"")+5, html_modified.search("\" alt=\""))
-            }
-        }else if(comic_name == "Caribbean Blue"){
-            var html_modified = html.substring(0, html.search("\" class=\"attachment-full\"")) // Parse the  html...
-            var url = html_modified.substring(html_modified.lastIndexOf("src=\"")+5, html_modified.length)
-            if(page_url === "http://cblue.katbox.net//")
-                url = url;
-            return url // ...
-        }else if(comic_name == "XKCD"){
-            var html_modified = html.split("\"img\": \"http:\\/\\/imgs.xkcd.com\\/comics\\/")[1] // Parse the  html...
-            var url = "http://imgs.xkcd.com/comics/"+html_modified.split("\"")[0]
-            if(page_url === "http://xkcd.com/info.0.json")
-                latest_url = "http://xkcd.com/"+String(parseInt(html.split("\"num\": ")[1].split(",")[0]))+"/info.0.json";
-            return url // ...
-        }
-    }
-
     function get_comic_by_url(url_to_load){
+
         if(url_to_load === "[last]"){
             last();
         }else{
-            page_url = url_to_load;
-            if(comic_name === "Freefall"){
-                if(page_url === "http://freefall.purrsia.com/"){
-                    last();
-                }
-
-                comic_strip.source = ""; // Clear the source of the comic strip
-                var fc_vs_fv = "fv"
-                var png_vs_gif = ".gif"
-                if(page_url === "http://freefall.purrsia.com/ff1300/fc01253.htm"){
-                    page_url = "http://freefall.purrsia.com/ff1300/fc01253.htm"
-                    loadComic("http://freefall.purrsia.com/ff1300/fc01253.png");
-                }else{
-                    if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1253){
-                        fc_vs_fv = "fc"
-                        png_vs_gif = ".png"
-                    }
-                    loadComic(page_url.split(".htm")[0] + png_vs_gif)
-                }
-            }else if(comic_name === "Twokinds"){
-                page_url = url_to_load; // The url of the page is set
-                var request = new XMLHttpRequest() // Variable to hold the request
-                request.open('GET', page_url) // Send the request
-                request.onreadystatechange = function(event) { // When the page loading state is changed
-                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                        html = request.responseText; // Load the html to the variable
-                        loadComic(extract_image_url()); // Call load comic with the url of th last comic
-                    }
-                }
-                request.send() // Send the request
-            }else if(comic_name === "Caribbean Blue"){
-                page_url = url_to_load; // The url of the page is set
-                var request = new XMLHttpRequest() // Variable to hold the request
-                request.open('GET', page_url) // Send the request
-                request.onreadystatechange = function(event) { // When the page loading state is changed
-                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                        html = request.responseText; // Load the html to the variable
-                        loadComic(extract_image_url()); // Call load comic with the url of th last comic
-                    }
-                }
-                request.send() // Send the request
-            }else if(comic_name === "XKCD"){
-                page_url = url_to_load; // The url of the page is set
-                var request = new XMLHttpRequest() // Variable to hold the request
-                request.open('GET', page_url) // Send the request
-                request.onreadystatechange = function(event) { // When the page loading state is changed
-                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                        html = request.responseText; // Load the html to the variable
-                        console.log(html)
-                        loadComic(extract_image_url()); // Call load comic with the url of th last comic
-                    }
-                }
-                request.send() // Send the request
-            }
+            adapter.get_by_url(url_to_load);
         }
     }
 
@@ -338,284 +218,54 @@ Item {
     // Function that determines the url of the last strip and calls load_comic to load it
 
     function last(){
+
         comic_strip.source = ""; // Clear the source of the comic strip
-        if(comic_name === "Freefall"){ // If the last Freefall must be loaded...
-            page_url = "http://freefall.purrsia.com/"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    html = request.responseText; // Load the html to the variable
-                    loadComic(extract_image_url()); // Call load comic with the url of th last comic
-                }
-            }
-            request.send() // Send the request
-        }else if(comic_name === "Twokinds"){ // If the last Twokinds must be loaded...
-            page_url = "http://twokinds.keenspot.com/"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    html = request.responseText; // Load the html to the variable
-                    loadComic(extract_image_url()); // Call load comic with the url of th last comic
-                }
-            }
-            request.send() // Send the request
-        }else if(comic_name === "Caribbean Blue"){ // If the last Caribbean Blue must be loaded...
-            page_url = "http://cblue.katbox.net//"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    html = request.responseText; // Load the html to the variable
-                    loadComic(extract_image_url());// Call load comic with the url of the last comic
-                }
-            }
-            request.send() // Send the request
-        }else if(comic_name === "XKCD"){
-            page_url = "http://xkcd.com/info.0.json"; // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    html = request.responseText; // Load the html to the variable
-                    loadComic(extract_image_url());// Call load comic with the url of the last comic
-                }
-            }
-            request.send() // Send the request
-        }
+        adapter.latest_url();
 
     }
 
     // Function that fetches next comic
 
     function next(){
-        if(comic_name === "Freefall" && page_url !== "http://freefall.purrsia.com/" && comic_strip.source != latest_url){ // If the next Freefall must be loaded...
-            comic_strip.source = ""; // Clear the source of the comic strip
-            var fc_vs_fv = "fv"
-            var png_vs_gif = ".gif"
-            if(page_url === "http://freefall.purrsia.com/ff1300/fv01252.htm"){
-                page_url = "http://freefall.purrsia.com/ff1300/fc01253.htm"
-                loadComic("http://freefall.purrsia.com/ff1300/fc01253.png");
-            }else{
-                if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1252){
-                    fc_vs_fv = "fc"
-                    png_vs_gif = ".png"
-                }
-                if(page_url.split(".")[2].substring(page_url.split(".")[2].length-2, page_url.split(".")[2].length) !== "00"){
-                    page_url = page_url.split(fc_vs_fv)[0]+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString()+".htm";
-                    loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                }else{
-                    page_url = page_url.split("ff")[0]+"ff"+(parseInt(page_url.substring(page_url.indexOf("ff")+2, page_url.lastIndexOf("/f")))+100).toString()+"/"+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString()+".htm";
-                    loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                }
-            }
-        }else if(comic_name === "Twokinds"){ // If the next Twokinds must be loaded...
-            if(page_url !== "http://twokinds.keenspot.com/archive.php" && page_url !== "http://twokinds.keenspot.com/index.php"){
-                if(html.indexOf("id=\"cg_next\"><span>Next Comic &raquo;</span></a>") !== -1){
-                    var request = new XMLHttpRequest() // Variable to hold the request
-                    page_url = "http://twokinds.keenspot.com/archive.php?p="+(parseInt(page_url.split("=")[1])+1).toString()
-                    request.open('GET', page_url)
-                    request.onreadystatechange = function(event) { // When the page loading state is changed
-                        if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                            html = request.responseText; // Load the html to the variable
-                            loadComic(extract_image_url());
-                        }
-                    }
-                    request.send() // Send the request
-                }else{
-                    last();
-                }
 
-
-            }else if(page_url === "http://twokinds.keenspot.com/archive.php"){
-                last()
-            }
-        }else if(comic_name === "Caribbean Blue" && comic_strip.source != latest_url){ // If the next Caribbean Blue must be loaded...
-            page_url = html.substring(html.indexOf("<img src=\"http://cblue.katbox.net/wp-content/uploads/sites/5/2014/02/nav_prev1.png\" alt=\"&lsaquo;\"></a>	<a href=\"")+113, html.indexOf("\" class=\"webcomic-link webcomic1-link next-webcomic-link next-webcomic1-link\" rel=\"next\">")); // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    html = request.responseText; // Load the html to the variable
-                    loadComic(extract_image_url());  // Call load comic with the url of th last comic
-                }
-            }
-            request.send() // Send the request
-        }else if(comic_name === "XKCD"){
-            if(page_url !== "http://xkcd.com/info.0.json" && page_url !== latest_url){
-                page_url = "http://xkcd.com/"+String(parseInt(page_url.split("http://xkcd.com/")[1].split("/info.0.json")[0])+1)+"/info.0.json"
-                var request = new XMLHttpRequest() // Variable to hold the request
-                request.open('GET', page_url) // Send the request
-                request.onreadystatechange = function(event) { // When the page loading state is changed
-                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                        html = request.responseText; // Load the html to the variable
-                        loadComic(extract_image_url(html));  // Call load comic with the url of th last comic
-                    }
-                }
-                request.send() // Send the request
-            }
-        }
+        adapter.next_url();
     }
 
     // Function that determines the previous strip and calls load_comic
 
     function previous(){
-        if(comic_name === "Freefall"){ // If the next Freefall must be loaded...
-            if(page_url !== "http://freefall.purrsia.com/"){
-                if(page_url !== "http://freefall.purrsia.com/ff100/fv00001.htm"){
-                    comic_strip.source = ""; // Clear the source of the comic strip
-                    var fc_vs_fv = "fv"
-                    var png_vs_gif = ".gif"
 
-                    if(page_url === "http://freefall.purrsia.com/ff1300/fc01253.htm"){
-                        page_url = "http://freefall.purrsia.com/ff1300/fv01252.htm"
-                        loadComic("http://freefall.purrsia.com/ff1300/fv01252.gif");
-                    }else{
-
-                        if(parseInt(page_url.split(".")[2].substring(page_url.split(".")[2].length-5, page_url.split(".")[2].length)) > 1253){
-                            fc_vs_fv = "fc"
-                            png_vs_gif = ".png"
-                        }
-                        if(page_url.split(".")[2].substring(page_url.split(".")[2].length-2, page_url.split(".")[2].length) !== "00"){
-                            page_url = page_url.split(fc_vs_fv)[0]+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])-1).toString()+".htm";
-                            loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                        }else{
-                            page_url = page_url.split("ff")[0]+"ff"+(parseInt(page_url.substring(page_url.indexOf("ff")+2, page_url.lastIndexOf("/f")))-100).toString()+"/"+fc_vs_fv+Array((5-(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])+1).toString().length)+1).join("0")+(parseInt(page_url.split(fc_vs_fv)[1].split(png_vs_gif)[0])-1).toString()+".htm";
-                            loadComic(page_url.split(".htm")[0]+png_vs_gif); // Call load comic with the url of the last comic
-                        }
-                    }
-                }
-            }else{
-                var html_modified = html.substring(0, html.indexOf("\">Previous</A>"));
-                page_url = "http://freefall.purrsia.com"+html_modified.substring(html_modified.lastIndexOf("<A HREF=\"")+9, html_modified.length);
-                loadComic(page_url.split(".htm")[0]+".png");
-            }
-        }else if(comic_name === "Twokinds"){ // If the next Twokinds must be loaded...
-            if(page_url !== "http://twokinds.keenspot.com/"){
-                if(page_url !== "http://twokinds.keenspot.com/archive.php?p=1" && page_url !== "http://twokinds.keenspot.com/archive.php"){
-                    var request = new XMLHttpRequest() // Variable to hold the request
-                    page_url = "http://twokinds.keenspot.com/archive.php?p="+(parseInt(page_url.split("=")[1])-1).toString()
-                    request.open('GET', page_url)
-                    request.onreadystatechange = function(event) { // When the page loading state is changed
-                        if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                            html = request.responseText; // Load the html to the variable
-                            loadComic(extract_image_url());
-                        }
-                    }
-                    request.send() // Send the request
-                }else{
-                    if(page_url == "http://twokinds.keenspot.com/archive.php?p=1"){
-                        first();
-                    }else{
-                        var request = new XMLHttpRequest() // Variable to hold the request
-                        page_url = html.substring(html.indexOf("<span class=\"cg_divider\"> &middot; </span><a href=\"")+51, html.indexOf("\" id=\"cg_back\">"))
-                        request.open('GET', page_url)
-                        request.onreadystatechange = function(event) { // When the page loading state is changed
-                            if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                                html = request.responseText; // Load the html to the variable
-                                loadComic(extract_image_url());
-                            }
-                        }
-                        request.send() // Send the request
-                    }
-                }
-
-
-            }else{
-                var request = new XMLHttpRequest() // Variable to hold the request
-                page_url = "http://twokinds.keenspot.com/archive.php"
-                request.open('GET', page_url)
-                request.onreadystatechange = function(event) { // When the page loading state is changed
-                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                        html = request.responseText; // Load the html to the variable
-                        loadComic(extract_image_url());
-                    }
-                }
-                request.send() // Send the request
-            }
-        }else if(comic_name === "Caribbean Blue" && page_url !== "http://cblue.katbox.net/comic/caribbean-blue/"){ // If the next Caribbean Blue must be loaded...
-            page_url = html.substring(html.indexOf("<img src=\"http://cblue.katbox.net/wp-content/uploads/sites/5/2014/02/nav_first1.png\" alt=\"&laquo;\"></a>	<a href=\"")+113, html.indexOf("\" class=\"webcomic-link webcomic1-link previous-webcomic-link previous-webcomic1-link\" rel=\"prev\"><img src=\"")); // The url of the page is set
-            var request = new XMLHttpRequest() // Variable to hold the request
-            request.open('GET', page_url) // Send the request
-            request.onreadystatechange = function(event) { // When the page loading state is changed
-                if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                    html = request.responseText; // Load the html to the variable
-                    loadComic(extract_image_url(html));  // Call load comic with the url of th last comic
-                }
-            }
-            request.send() // Send the request
-        }else if(comic_name === "XKCD"){
-            if(page_url === "http://xkcd.com/info.0.json"){
-                page_url = "http://xkcd.com/"+String(parseInt(html.split("\"num\": ")[1].split(",")[0])-1)+"/info.0.json"
-                var request = new XMLHttpRequest() // Variable to hold the request
-                request.open('GET', page_url) // Send the request
-                request.onreadystatechange = function(event) { // When the page loading state is changed
-                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                        html = request.responseText; // Load the html to the variable
-                        loadComic(extract_image_url(html));  // Call load comic with the url of th last comic
-                    }
-                }
-                request.send() // Send the request
-            }else{
-                if(page_url !== "http://xkcd.com/1/info.0.json"){
-                page_url = "http://xkcd.com/"+String(parseInt(page_url.split("http://xkcd.com/")[1].split("/info.0.json")[0])-1)+"/info.0.json"
-                var request = new XMLHttpRequest() // Variable to hold the request
-                request.open('GET', page_url) // Send the request
-                request.onreadystatechange = function(event) { // When the page loading state is changed
-                    if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                        html = request.responseText; // Load the html to the variable
-                        loadComic(extract_image_url(html));  // Call load comic with the url of th last comic
-                    }
-                }
-                request.send() // Send the request
-                }
-            }
-        }
+        adapter.previous_url();
     }
 
     // Function that determines the first strip and calls load_comic
 
     function first(){
+
         comic_strip.source = ""; // Clear the source of the comic strip
-        //html = ""; // Variable to hold the content of the html-page
-        if(comic_name === "Freefall"){ // If the last Freefall must be loaded...
-            page_url = "http://freefall.purrsia.com/ff100/fv00001.htm"; // Set the page url
-            loadComic("http://freefall.purrsia.com/ff100/fv00001.gif"); // Load the comic
-        }else if(comic_name === "Twokinds"){ // If the last Twokinds must be loaded...
-            page_url = "http://twokinds.keenspot.com/archive.php?p=1"; // Set the page url
-            loadComic("http://cdn.twokinds.keenspot.com/comics/20031022.jpg"); // Load the comic
-        }else if(comic_name === "Caribbean Blue"){ // If the last Caribbean Blue must be loaded...
-            page_url = "http://cblue.katbox.net/comic/caribbean-blue/"; // Set the page url
-            loadComic("http://cblue.katbox.net/wp-content/uploads/sites/5/2013/01/cb000en.png"); // Load the comic
-        }else if(comic_name === "XKCD"){ // If the last Caribbean Blue must be loaded...
-            page_url = "http://xkcd.com/1/info.0.json"; // Set the page url
-            loadComic("http://imgs.xkcd.com/comics/barrel_cropped_(1).jpg"); // Load the comic
-        }
-        var request = new XMLHttpRequest() // Variable to hold the request
-        request.open('GET', page_url) // Send the request
-        request.onreadystatechange = function(event) { // When the page loading state is changed
-            if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
-                html = request.responseText; // Load the html to the variable
-            }
-        }
-        request.send() // Send the request
+        adapter.first_url();
     }
 
-    id: shape
-    width: parent.width - units.gu(3);
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenter: parent.verticalCenter
-    height: (parent.height / 3)*2;
-    Flickable{ // Flickable to hold the image
-        function get_width(){ // Function to determine the width of the Flickable
+    // Flickable to hold the image
+
+    Flickable{
+        id: comic_flickable;
+
+        // Function to determine the width of the Flickable
+
+        function get_width(){
+
             if(parent.width > comic_strip.width){
                 return comic_strip.width;
             }else{
                 return parent.width;
             }
         }
-        function get_height(){ // Function to determine the height of the Flickable
+
+        // Function to determine the height of the Flickable
+
+        function get_height(){
+
             if(parent.height > comic_strip.height){
                 return comic_strip.height;
             }else{
@@ -623,105 +273,55 @@ Item {
             }
         }
 
-        width: get_width()
+        width: get_width();
         height: get_height();
         contentWidth: comic_strip.width;
-        contentHeight: comic_strip.height
-        anchors.horizontalCenter: parent.horizontalCenter
+        contentHeight: comic_strip.height;
+        anchors.horizontalCenter: parent.horizontalCenter;
         clip: true;
-        Image{ // Image to hold the comic strip
-            id: comic_strip
+
+        // Image to hold the comic strip
+
+        Image{
+            id: comic_strip;
             visible: false;
-            onProgressChanged: checkLoading() // Calls check_comic whenever the progress changes
+
+            // Calls check_comic whenever the progress changes
+
+            onProgressChanged: checkLoading();
         }
     }
 
-    ProgressBar { // Busy-indicator
-        id: activity
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+    // ProgressBar giving indication of remaining image to download
+
+    ProgressBar {
+        id: activity;
+        anchors.horizontalCenter: parent.horizontalCenter;
+        anchors.verticalCenter: parent.verticalCenter;
         value: 0;
         visible: false;
     }
-    Item{
-        id:no_selection_msg
-        anchors.horizontalCenter: parent.horizontalCenter;
-        width: parent.width;
-    Rectangle{
-        color: "#333333b6"
-        width: units.gu(30)
-        height: units.gu(30)
-        radius: units.gu(15)
-        anchors.horizontalCenter: parent.horizontalCenter;
-        y: parent.y + units.gu(1)
-    }
-    Rectangle{
-        color: "#DD4814"
-        width: units.gu(30)
-        height: units.gu(30)
-        radius: units.gu(15)
-        anchors.horizontalCenter: parent.horizontalCenter;
-        y: parent.y
-    }
+
+    // Text telling that the comic is loading
+
     Text{
-        text: "!"
-        font.bold: true
-        font.pointSize: 140
-        font.family: "Ubuntu"
-        anchors.horizontalCenter: parent.horizontalCenter;
-        color: "#AEA79F"
-        y: parent.y+units.gu(1)/2
-
-    }
-    Text{
-        text: "!"
-        font.bold: true
-        font.pointSize: 140
-        font.family: "Ubuntu"
-        anchors.horizontalCenter: parent.horizontalCenter;
-        color: "White"
-        y: parent.y
-
-    }
-    Text{
-        wrapMode: Text.WordWrap
-        text: "Please select a comic to read before going to \"Read Comic\"."
-        font.pointSize: 24
-        font.family: "Ubuntu"
-        width: getWidth();
-        color: "#333333"
-        function getWidth(){
-            if(Screen.width < units.gu(70)){
-                return Screen.width
-            }else{
-                return units.gu(70)
-            }
-        }
-        x: parent.width/2-getWidth()/2;
-        y: parent.y+units.gu(35)
-        horizontalAlignment: Text.AlignHCenter
-
-    }
-    Button{
-        color: "#DD4814"
-        anchors.horizontalCenter: parent.horizontalCenter;
-        y: parent.y+units.gu(46)
-        iconSource: "../graphics/back.svg"
-        width: units.gu(7)
-        height: units.gu(7)
-        onClicked: tabs.selectedTabIndex = 0;
-
-    }
-    }
-
-    Text{ // Text telling that the comic is loading
-        id: comic_status
-        text: comic_name+i18n.tr(" is loading.")
-        font.family: "Ubuntu"
-        font.pointSize: 12;
+        id: comic_status;
+        text: comic_name+i18n.tr(" is loading.");
+        font.family: "Ubuntu";
+        font.pointSize: 15;
         color: "#333333"
         anchors.horizontalCenter: parent.horizontalCenter;
         y: activity.y + units.gu(5);
         visible: false;
+    }
+
+    // Message that, if lucky is shown in case of error
+
+    VisualMsg{
+        id: error_msg;
+        anchors.verticalCenter: parent.verticalCenter;
+        width: parent.width;
+        msg: "Something went wrong. Please try again"
+        sign: "☹"
     }
 }
