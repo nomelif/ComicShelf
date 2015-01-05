@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=ComicShelf
-Exec=./qtc_device_debughelper.py app "qmlscene $@ main.qml"
+Exec=qmlscene $@ main.qml
 Icon=graphics/logo_2.svg
 Terminal=false
 Type=Application

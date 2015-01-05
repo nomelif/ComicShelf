@@ -18,18 +18,26 @@ MainView {
         ListElement { // Twokinds
             comic_name: "Twokinds";
             artist: "Tom Fischbach";
-            favicon_url: "http://twokinds.keenspot.com/favicon.ico";
+            favicon_url: "../graphics/twokinds.svg";
+            bookmark: -1;
         }
         ListElement { // Freefall
             comic_name: "Freefall";
             artist: "Mark Stanley";
-            favicon_url: "http://freefall.purrsia.com/funstuff/freefall.ico";
+            favicon_url: "../graphics/freefall.svg";
+            bookmark: -1;
         }
         ListElement { // XKCD
             comic_name: "XKCD";
             artist: "Randall Munroe";
-            favicon_url: "../graphics/xkcd.png";
-        }/*
+            favicon_url: "../graphics/xkcd.svg";
+            bookmark: -1;
+        }
+        /*ListElement { // ACBF
+            comic_name: "ACBF";
+            artist: "Generism";
+            favicon_url: "http://images.clipartpanda.com/question-701-question-mark-design.png";
+        }
         ListElement { // Carribbean Blue
             comic_name: "Caribbean Blue"
             artist: "Ronaldo \"Nekonny\" Rodrigues"

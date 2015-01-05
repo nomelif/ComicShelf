@@ -35,6 +35,12 @@ Item {
         archive: archive_model;
     }
 
+    ACBFAdapter{
+        id: acbf_adapter;
+        load: loadComic;
+        archive: archive_model;
+    }
+
     // Properties ------------------------------------------------------------------------------
 
 
@@ -115,8 +121,18 @@ Item {
     function filter_archives(search_querry, archive_selector){
 
         var i = 1;
+        var keywords = search_querry.toLowerCase().split(" ");
         while(i < archive_model_copy.count){
-            if(archive_model_copy.get(i).name.indexOf(search_querry) !== -1){
+            var ii = 0;
+            var listEntry = false;
+            while(!listEntry && ii < keywords.length){
+                if(archive_model_copy.get(i).name.toLowerCase().indexOf(keywords[ii]) !== -1){
+                    listEntry = true;
+                }
+                ii++;
+            }
+
+            if(listEntry){
                 if(archive_selector.url === archive_model_copy.get(i).url){
                     archive_selector.selectedIndex = i;
                 }
@@ -157,6 +173,8 @@ Item {
             adapter =  cblue_adapter;
         }else if(name === "XKCD"){
             adapter =  xkcd_adapter;
+        }else if(name === "ACBF"){
+            adapter =  acbf_adapter;
         }
 
         error_msg.visible = false;
@@ -247,49 +265,62 @@ Item {
     }
 
     // Flickable to hold the image
-
-    Flickable{
-        id: comic_flickable;
-
-        // Function to determine the width of the Flickable
-
-        function get_width(){
-
-            if(parent.width > comic_strip.width){
-                return comic_strip.width;
-            }else{
-                return parent.width;
+    PinchArea {
+        anchors.fill: parent
+        pinch.target: comic_strip
+        pinch.minimumScale: 0.5
+        pinch.maximumScale: 7
+        MouseArea {
+            id: dragArea
+            hoverEnabled: true
+            anchors.fill: parent
+            drag.target: comic_strip
+            drag.onActiveChanged: {
+                if(drag.active){
+                    comic_strip.state = "default"
+                }
             }
-        }
 
-        // Function to determine the height of the Flickable
-
-        function get_height(){
-
-            if(parent.height > comic_strip.height){
-                return comic_strip.height;
-            }else{
-                return parent.height;
+            onDoubleClicked: {
+                comic_strip.state = "centered"
+                //comic_strip.x = comic_strip.parent.width / 2 -comic_strip.width / 2;
+                //comic_strip.y = comic_strip.parent.height / 2 - comic_strip.height / 2;
             }
-        }
-
-        width: get_width();
-        height: get_height();
-        contentWidth: comic_strip.width;
-        contentHeight: comic_strip.height;
-        anchors.horizontalCenter: parent.horizontalCenter;
-        clip: true;
-
-        // Image to hold the comic strip
 
         Image{
+            x: (parent.width - width) / 2
+            y: (parent.height - height) / 2
             id: comic_strip;
             visible: false;
+            smooth: true;
+            anchors.centerIn: undefined;
 
             // Calls check_comic whenever the progress changes
 
             onProgressChanged: checkLoading();
-        }
+
+            state: "default"
+
+            states: [
+                State{
+                    name: "centered";
+                    AnchorChanges {
+                        target: comic_strip;
+                        anchors.horizontalCenter: comic_strip.parent.horizontalCenter;
+                        anchors.verticalCenter: comic_strip.parent.verticalCenter;
+                    }
+                }
+
+            ]
+            transitions: Transition {
+                     // smoothly reanchor myRect and move into new position
+                    from: "default"
+                    AnchorAnimation { duration: 150 }
+                 }
+
+
+    }
+    }
     }
 
     // ProgressBar giving indication of remaining image to download
@@ -308,7 +339,7 @@ Item {
         id: comic_status;
         text: comic_name+i18n.tr(" is loading.");
         font.family: "Ubuntu";
-        font.pointSize: 15;
+        font.pixelSize: units.gu(2);
         color: "#333333"
         anchors.horizontalCenter: parent.horizontalCenter;
         y: activity.y + units.gu(5);

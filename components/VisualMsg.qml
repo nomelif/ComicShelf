@@ -7,7 +7,7 @@ import QtQuick.Window 2.0
 
 Item{
 
-    property string sign: "☆";
+    property string sign: "✉";
     property string msg;
 
     id:more_stuff_coming_soon_msg

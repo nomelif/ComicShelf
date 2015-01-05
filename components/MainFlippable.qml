@@ -42,7 +42,7 @@ Page{
                 model: comics_list_model;
                 delegate:
 
-                    // ListItem
+                     // ListItem
 
                     ListItem.Subtitled {
 
@@ -50,7 +50,7 @@ Page{
 
                     iconSource: favicon_url;
                     text: comic_name;
-                    subText: i18n.tr("by ")+artist;
+                    subText: i18n.tr("by ")+artist+(bookmark !== -1 ? ("    bookmark on "+bookmark+(bookmark === 1 ? "st" : bookmark === 2 ? "nd" : bookmark === 3 ? "rd" : "th")) : "");
                     onClicked: {
 
                         // Change tab and set comic
@@ -58,6 +58,7 @@ Page{
                         flipable.flipped = !flipable.flipped;
                         comic.set_comic(comic_name);
                     }
+                    smooth: true;
                 }
             }
 
@@ -65,7 +66,7 @@ Page{
 
             VisualMsg{
                 y: units.gu(10)
-                msg: "More Stuff Coming Soon"
+                msg: "What comics do <strong>you</strong> want?\nTell me at <i>theo.friberg@gmail.com</i> !"
             }
 
         }
@@ -184,17 +185,10 @@ Page{
                 contentWidth: copyright.width
                 height: units.gu(30)
                 clip: true
-            Rectangle{
-                radius: 4;
-                width: parent.width
-                height: copyright.height
-                color: "#333333"
-                clip: true
             Text{
                 id: copyright
-                color: "#AEA79F"
                 font.family: "Ubuntu Mono"
-                font.pointSize: 8.4
+                font.pixelSize: units.gu(2.5)
                 text: "
     *******************************************
     *                                         *
@@ -242,7 +236,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
              LICENSES, WICH MAY VARY.
 
 "
-            }
             }
             }
 

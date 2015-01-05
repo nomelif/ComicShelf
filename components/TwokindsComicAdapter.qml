@@ -14,7 +14,7 @@ Item {
             if (request.readyState === XMLHttpRequest.DONE) { // If the page is loaded
                 var html_modified = request.responseText; // Load the html to the variable
                 // Split the html by chapter
-                html_modified = html_modified.substring(html_modified.indexOf("<div class=\"archive\">"), html_modified.indexOf("<div class=\"content-bottom\"></div>")); // Call load comic with the url of th last comic
+                html_modified = html_modified.substring(html_modified.indexOf("<div class=\"archive\">"), html_modified.indexOf("<div style=\"clear: both;\"></div>")); // Call load comic with the url of th last comic
                 html_modified = html_modified.substring(0, html_modified.lastIndexOf("/a"))
                 html_modified = html_modified.split("<h4>");
                 var i = 1;
@@ -151,7 +151,7 @@ Item {
             return url;
         }else{
             var html_modified = html.substring(html.indexOf("<p id=\"cg_img\">"), html.length)
-            return html_modified.substring(html_modified.search("src=\"")+5, html_modified.search("\" alt=\""))
+            return "http://twokinds.keenspot.com"+html_modified.substring(html_modified.search("src=\"")+5, html_modified.search("\" alt=\""))
         }
     }
 }
