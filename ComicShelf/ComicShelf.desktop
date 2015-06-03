@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=ComicShelf
 Exec=ComicShelf
-Icon=ComicShelf/ComicShelf.png
+Icon=ComicShelf/logo_2.svg
 Terminal=false
 Type=Application
 X-Ubuntu-Touch=true

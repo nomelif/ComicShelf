@@ -12,7 +12,8 @@ RESOURCES += ComicShelf.qrc
 
 OTHER_FILES += ComicShelf.apparmor \
                ComicShelf.desktop \
-               ComicShelf.png
+               ComicShelf.png \
+    logo_2.svg
 
 #specify where the config files are installed to
 config_files.path = /ComicShelf
