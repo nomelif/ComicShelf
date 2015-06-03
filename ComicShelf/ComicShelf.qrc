@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Main.qml</file>
+        <file>components/ACBFAdapter.qml</file>
+        <file>components/XKCDComicAdapter.qml</file>
+        <file>components/CaribbeanBlueComicAdapter.qml</file>
+        <file>components/ComicComponent.qml</file>
+        <file>components/FreefallComicAdapter.qml</file>
+        <file>components/GenericComicAdapter.qml</file>
+        <file>components/MainFlippable.qml</file>
+        <file>components/NavigationalButtons.qml</file>
+        <file>components/TwokindsComicAdapter.qml</file>
+        <file>components/VisualMsg.qml</file>
+        <file>graphics/camera-flip.svg</file>
+        <file>graphics/comic_logo.svg</file>
+        <file>graphics/find.svg</file>
+        <file>graphics/freefall.png</file>
+        <file>graphics/freefall.svg</file>
+        <file>graphics/info.svg</file>
+        <file>graphics/LauncherIcon.svg</file>
+        <file>graphics/logo_2.svg</file>
+        <file>graphics/twokinds.svg</file>
+        <file>graphics/xkcd.png</file>
+        <file>graphics/xkcd.svg</file>
+    </qresource>
+</RCC>
